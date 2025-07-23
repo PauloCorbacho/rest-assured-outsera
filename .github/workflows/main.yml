@@ -14,11 +14,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK 21
+      - name: Set up JDK 11 (recommended for stability)
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '21'
+          java-version: '11'
 
       - name: Cache Maven packages
         uses: actions/cache@v3
@@ -28,29 +28,28 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Create output directories
+      - name: Create required directories
         run: mkdir -p target/cucumber-json target/cucumber-reports
 
-      - name: Build and run tests with debug
-        run: mvn clean verify -e -X
-
-      - name: Verify JSON files exist
+      - name: Run tests with debug output
         run: |
-          echo "Generated files in target/cucumber-json:"
-          ls -la target/cucumber-json || echo "No cucumber-json directory found"
-          echo "Generated files in target:"
-          ls -la target
+          mvn clean test -Dcucumber.plugin="html:target/cucumber-reports/cucumber.html,json:target/cucumber-json/cucumber.json" -e -X
 
-      - name: Upload Cucumber Report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: cucumber-report
-          path: target/cucumber-reports
+      - name: Generate Cucumber reports
+        run: mvn cucumber-reporting:generate
 
-      - name: Upload Test Results
+      - name: Verify generated files
+        run: |
+          echo "Contents of target/cucumber-json:"
+          ls -la target/cucumber-json/
+          echo "Contents of target/cucumber-reports:"
+          ls -la target/cucumber-reports/
+
+      - name: Upload test reports
         uses: actions/upload-artifact@v4
-        if: always()
         with:
-          name: test-results
-          path: target/surefire-reports
+          name: test-reports
+          path: |
+            target/cucumber-reports/
+            target/cucumber-json/
+            target/surefire-reports/
