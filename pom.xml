@@ -68,16 +68,17 @@
                 <version>5.7.6</version>
                 <executions>
                     <execution>
-                        <id>generate-cucumber-reports</id>
+                        <id>generate</id>
                         <phase>verify</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <projectName>API Test Automation</projectName>
-                            <outputDirectory>${project.build.directory}/cucumber-report</outputDirectory>
+                            <projectName>Your Project Name</projectName>
+                            <outputDirectory>${project.build.directory}/cucumber-reports</outputDirectory>
+                            <inputDirectory>${project.build.directory}/cucumber-json</inputDirectory>
                             <jsonFiles>
-                                <jsonFile>${project.build.directory}/cucumber.json</jsonFile>
+                                <param>**/*.json</param>
                             </jsonFiles>
                         </configuration>
                     </execution>
