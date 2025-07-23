@@ -29,4 +29,24 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Build and run tests
-        run: mvn clean verify
+        run: mvn clean verify -DskipTests=false
+
+      - name: List generated files (for debugging)
+        run: |
+          ls -R target
+          ls -R target/cucumber-reports || true
+          ls -R target/cucumber-json || true
+
+      - name: Upload Cucumber Report
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: cucumber-report
+          path: target/cucumber-reports
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: test-results
+          path: target/surefire-reports
