@@ -12,13 +12,13 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Set up JDK 21
+      - name: Set up JDK 17 (matches your POM configuration)
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '21'
+          java-version: '17'
 
       - name: Cache Maven packages
         uses: actions/cache@v3
@@ -28,5 +28,20 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Build and run tests
-        run: mvn clean verify
+      - name: Build and test with Maven
+        run: mvn clean verify -e -X
+
+      - name: Verify JSON files
+        run: |
+          ls -la target/cucumber-json/ || echo "No cucumber-json directory"
+          ls -la target/cucumber-reports/ || echo "No cucumber-reports directory"
+
+      - name: Upload test reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-reports
+          path: |
+            target/cucumber-reports/
+            target/cucumber-json/
+            target/surefire-reports/
