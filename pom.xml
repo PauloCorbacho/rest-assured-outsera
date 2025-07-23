@@ -68,21 +68,22 @@
                 <version>5.7.6</version>
                 <executions>
                     <execution>
-                        <id>generate-cucumber-report</id>
+                        <id>generate-cucumber-reports</id>
                         <phase>verify</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <projectName>REST Assured API Tests</projectName>
-                            <reportOutputDirectory>${project.build.directory}/cucumber-reports</reportOutputDirectory>
+                            <projectName>API Test Automation</projectName>
+                            <outputDirectory>${project.build.directory}/cucumber-report</outputDirectory>
                             <jsonFiles>
-                                <param>${project.build.directory}/cucumber.json</param>
+                                <jsonFile>${project.build.directory}/cucumber.json</jsonFile>
                             </jsonFiles>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+
         </plugins>
     </build>
 </project>
