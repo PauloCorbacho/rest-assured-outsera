@@ -14,11 +14,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK 11 (recommended for stability)
+      - name: Set up JDK 17 (matches your POM configuration)
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '11'
+          java-version: '17'
 
       - name: Cache Maven packages
         uses: actions/cache@v3
@@ -28,25 +28,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Create required directories
-        run: mkdir -p target/cucumber-json target/cucumber-reports
+      - name: Build and test with Maven
+        run: mvn clean verify -e -X
 
-      - name: Run tests with debug output
+      - name: Verify JSON files
         run: |
-          mvn clean test -Dcucumber.plugin="html:target/cucumber-reports/cucumber.html,json:target/cucumber-json/cucumber.json" -e -X
-
-      - name: Generate Cucumber reports
-        run: mvn cucumber-reporting:generate
-
-      - name: Verify generated files
-        run: |
-          echo "Contents of target/cucumber-json:"
-          ls -la target/cucumber-json/
-          echo "Contents of target/cucumber-reports:"
-          ls -la target/cucumber-reports/
+          ls -la target/cucumber-json/ || echo "No cucumber-json directory"
+          ls -la target/cucumber-reports/ || echo "No cucumber-reports directory"
 
       - name: Upload test reports
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: test-reports
           path: |
