@@ -1,0 +1,31 @@
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+**/logs/
+*.log
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+out/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Build output
+*.class
+
+# IDE cache
+*.ipr
+
+# Test reports
+cucumber-reports/
+extent.report/
+*.html
+*.json
+
+# Environment files
+.env
+*.properties.local
