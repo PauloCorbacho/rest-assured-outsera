@@ -2,7 +2,6 @@ package stepsdefinitions;
 
 import core.ApiClient;
 import core.TestDataBuilder;
-import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.When;
 import io.cucumber.java.en.Then;

@@ -34,6 +34,6 @@ public class TestDataBuilder {
     private static String generateDynamicContent() {
         int paragraphs = ThreadLocalRandom.current().nextInt(1, 4);
         List<String> paragraphsList = faker.lorem().paragraphs(paragraphs);
-        return paragraphsList.stream().collect(Collectors.joining("\n\n"));
+        return String.join("\n\n", paragraphsList);
     }
 }
