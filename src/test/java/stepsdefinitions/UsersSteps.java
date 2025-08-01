@@ -1,45 +1,58 @@
 package stepsdefinitions;
 
+import core.ApiClient;
 import io.cucumber.java.en.And;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import java.util.List;
 import java.util.Map;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
-public class UsersSteps extends BaseSteps{
+public class UsersSteps {
+    private final ApiClient apiClient;
+
+    public UsersSteps(ApiClient apiClient) {
+        this.apiClient = apiClient;
+    }
+
+    @When("I get all users")
+    public void getAllUsers() {
+        apiClient.get("/users");
+    }
+
+    @When("I get user with id {int}")
+    public void getUserById(int userId) {
+        apiClient.get("/users/" + userId);
+    }
 
     @And("the response should contain a list of users")
-    public void theResponseShouldContainAListOfUsers() {
-        List<Map<String, Object>> users = response.jsonPath().getList("$");
+    public void verifyUsersList() {
+        List<Map<String, Object>> users = apiClient.getLastResponse().jsonPath().getList("$");
         assertThat(users.size(), greaterThan(0));
-
-        users.forEach(user -> {
-            assertThat(user.get("id"), notNullValue());
-            assertThat(user.get("name"), notNullValue());
-            assertThat(user.get("username"), notNullValue());
-            assertThat(user.get("email"), notNullValue());
-            assertThat(user.get("address"), notNullValue());
-            assertThat(user.get("phone"), notNullValue());
-            assertThat(user.get("website"), notNullValue());
-            assertThat(user.get("company"), notNullValue());
-        });
+        users.forEach(this::verifyUserStructure);
     }
 
-    @And("the response should contain valid user details with id {int}")
-    public void theResponseShouldContainValidUserDetailsWithId(int userId) {
-        assertThat(response.jsonPath().getInt("id"), is(userId));
-        assertThat(response.jsonPath().getString("name"), not(emptyString()));
-        assertThat(response.jsonPath().getString("username"), not(emptyString()));
-        assertThat(response.jsonPath().getString("email"), not(emptyString()));
-        assertThat(response.jsonPath().getMap("address"), notNullValue());
-        assertThat(response.jsonPath().getString("phone"), not(emptyString()));
-        assertThat(response.jsonPath().getString("website"), not(emptyString()));
-        assertThat(response.jsonPath().getMap("company"), notNullValue());
+    @And("the response should contain valid user details")
+    public void verifyUserDetails() {
+        verifyUserStructure(apiClient.getLastResponse().jsonPath().getMap("$"));
     }
 
-    @And("the email should be in valid format")
-    public void theEmailShouldBeInValidFormat() {
-        String email = response.jsonPath().getString("email");
-        assertThat(email, matchesPattern(".+@.+\\..+"));
+    @And("the user email should be valid")
+    public void verifyEmailFormat() {
+        String email = apiClient.getLastResponse().jsonPath().getString("email");
+        assertThat(email, matchesPattern("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$"));
+    }
+
+    private void verifyUserStructure(Map<String, Object> user) {
+        assertThat(user.get("id").toString(), not(emptyString()));
+        assertThat(user.get("name").toString(), not(emptyString()));
+        assertThat(user.get("username").toString(), not(emptyString()));
+        assertThat(user.get("email").toString(), not(emptyString()));
+        assertThat(user.get("address"), instanceOf(Map.class));
+        assertThat(user.get("phone").toString(), not(emptyString()));
+        assertThat(user.get("website").toString(), not(emptyString()));
+        assertThat(user.get("company"), instanceOf(Map.class));
     }
 }

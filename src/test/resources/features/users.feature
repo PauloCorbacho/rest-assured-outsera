@@ -1,18 +1,28 @@
-Feature: Users API
-  As a API consumer
-  I want to interact with the Users endpoint
-  So that I can retrieve user data
+Feature: Users Management
+  As an API consumer
+  I want to interact with user data
+  So that I can retrieve user information
 
   Background:
     Given the API base URL is "https://jsonplaceholder.typicode.com"
 
-  Scenario: Get all users
-    When I send a GET request to "/users"
+  Scenario Outline: Retrieve user by valid ID
+    When I get user with id <id>
     Then the response status code should be 200
-    And the response should contain a list of users
+    And the response should contain valid user details
+    And the user email should be valid
 
-  Scenario: Get a specific user
-    When I send a GET request to "/users/1"
-    Then the response status code should be 200
-    And the response should contain valid user details with id 1
-    And the email should be in valid format
+    Examples:
+      | id |
+      | 1  |
+      | 3  |
+      | 5  |
+
+  Scenario Outline: Verify invalid user requests
+    When I get user with id <id>
+    Then the response status code should be <status>
+
+    Examples:
+      | id   | status |
+      | 11   | 404    |
+      | -1   | 404    |

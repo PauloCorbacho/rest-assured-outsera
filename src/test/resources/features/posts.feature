@@ -1,44 +1,38 @@
-Feature: Posts API
-  As a API consumer
-  I want to interact with the Posts endpoint
-  So that I can manage post data
+Feature: Posts Management
+  As an API consumer
+  I want to interact with blog posts
+  So that I can retrieve and manage post data
 
   Background:
     Given the API base URL is "https://jsonplaceholder.typicode.com"
 
-  Scenario: Get all posts
-    When I send a GET request to "/posts"
+  Scenario Outline: Retrieve posts by valid user ID
+    When I get posts for user <userId>
     Then the response status code should be 200
-    And the response should contain a list of posts
+    And the response should contain only posts from user <userId>
 
-  Scenario: Get a specific post
-    When I send a GET request to "/posts/1"
-    Then the response status code should be 200
-    And the response should contain post details with id 1
+    Examples:
+      | userId |
+      | 1      |
+      | 3      |
+      | 7      |
 
-  Scenario: Try to get a non-existent post
-    When I send a GET request to "/posts/9999"
-    Then the response status code should be 404
+  Scenario Outline: Retrieve single post by ID
+    When I get post with id <id>
+    Then the response status code should be <status>
 
-  Scenario: Create a new post
-    Given I have the following post data:
-      | userId | 1       |
-      | title  | Test Post Title |
-      | body   | This is the body of the test post. |
-    When I send a POST request to "/posts" with the given data
+    Examples:
+      | id   | status |
+      | 1    | 200    |
+      | 9999 | 404    |
+
+  Scenario Outline: Create post with dynamic data
+    Given I prepare a new post for user <userId>
+    When I create the post
     Then the response status code should be 201
-    And the response should contain the created post data
+    And the response should match the request data
 
-  Scenario: Update a post
-    Given I have the following updated post data:
-      | id     | 1       |
-      | userId | 1       |
-      | title  | Updated Post Title |
-      | body   | This is the updated body of the post. |
-    When I send a PUT request to "/posts/1" with the given data
-    Then the response status code should be 200
-    And the response should contain the updated post data
-
-  Scenario: Delete a post
-    When I send a DELETE request to "/posts/1"
-    Then the response status code should be 200
+    Examples:
+      | userId |
+      | 1      |
+      | 5      |

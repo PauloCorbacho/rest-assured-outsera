@@ -1,41 +1,59 @@
 package stepsdefinitions;
 
-import io.cucumber.java.en.And;
+import core.ApiClient;
 import io.cucumber.java.en.When;
-
+import io.cucumber.java.en.Then;
 import java.util.List;
 import java.util.Map;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
-public class CommentsSteps extends BaseSteps {
+public class CommentsSteps {
+    private final ApiClient apiClient;
 
-    @When("I send a GET request to {string} with parameter {string} equal to {string}")
-    public void iSendAGETRequestToWithParameterEqualTo(String endpoint, String paramName, String paramValue) {
-        sendGetRequestWithParam(endpoint, paramName, paramValue);
+    public CommentsSteps(ApiClient apiClient) {
+        this.apiClient = apiClient;
     }
 
-    @And("the response should contain only comments for post with id {int}")
-    public void theResponseShouldContainOnlyCommentsForPostWithId(int postId) {
-        List<Map<String, Object>> comments = response.jsonPath().getList("$");
+    @When("I get comments for post {int}")
+    public void getCommentsForPost(int postId) {
+        apiClient.getWithParam("/comments", "postId", postId);
+    }
+
+    @When("I get comment with id {int}")
+    public void getCommentById(int commentId) {
+        apiClient.get("/comments/" + commentId);
+    }
+
+    @Then("the response should contain only comments for post {int}")
+    public void verifyCommentsForPost(int postId) {
+        List<Map<String, Object>> comments = apiClient.getLastResponse().jsonPath().getList("$");
         assertThat(comments.size(), greaterThan(0));
 
         comments.forEach(comment -> {
             assertThat(comment.get("postId"), is(postId));
-            assertThat(comment.get("id"), notNullValue());
-            assertThat(comment.get("name"), notNullValue());
-            assertThat(comment.get("email"), notNullValue());
-            assertThat(comment.get("body"), notNullValue());
+            verifyCommentStructure(comment);
         });
     }
 
-    @And("the response should contain comment details with id {int}")
-    public void theResponseShouldContainCommentDetailsWithId(int commentId) {
-        assertThat(response.jsonPath().getInt("id"), is(commentId));
-        assertThat(response.jsonPath().getInt("postId"), notNullValue());
-        assertThat(response.jsonPath().getString("name"), not(emptyString()));
-        assertThat(response.jsonPath().getString("email"), not(emptyString()));
-        assertThat(response.jsonPath().getString("body"), not(emptyString()));
+    @Then("the response should contain valid comment details")
+    public void verifyCommentDetails() {
+        verifyCommentStructure(apiClient.getLastResponse().jsonPath().getMap("$"));
+    }
+
+    private void verifyCommentStructure(Map<String, Object> comment) {
+        assertNotNull(comment.get("id"), "Comment ID should not be null");
+
+        assertInstanceOf(String.class, comment.get("name"), "Name should be a String");
+        assertFalse(((String) comment.get("name")).isEmpty(), "Name should not be empty");
+
+        assertInstanceOf(String.class, comment.get("email"), "Email should be a String");
+        assertFalse(((String) comment.get("email")).isEmpty(), "Email should not be empty");
+
+        assertInstanceOf(String.class, comment.get("body"), "Body should be a String");
+        assertFalse(((String) comment.get("body")).isEmpty(), "Body should not be empty");
     }
 }

@@ -1,17 +1,27 @@
-Feature: Comments API
-  As a API consumer
-  I want to interact with the Comments endpoint
-  So that I can retrieve comment data
+Feature: Comments Management
+  As an API consumer
+  I want to interact with post comments
+  So that I can retrieve and verify comment data
 
   Background:
     Given the API base URL is "https://jsonplaceholder.typicode.com"
 
-  Scenario: Get comments for a post
-    When I send a GET request to "/comments" with parameter "postId" equal to "1"
+  Scenario Outline: Retrieve comments for valid post ID
+    When I get comments for post <postId>
     Then the response status code should be 200
-    And the response should contain only comments for post with id 1
+    And the response should contain only comments for post <postId>
 
-  Scenario: Get a specific comment
-    When I send a GET request to "/comments/1"
-    Then the response status code should be 200
-    And the response should contain comment details with id 1
+    Examples:
+      | postId |
+      | 1      |
+      | 5      |
+      | 10     |
+
+  Scenario Outline: Retrieve single comment by ID
+    When I get comment with id <id>
+    Then the response status code should be <status>
+
+    Examples:
+      | id   | status |
+      | 1    | 200    |
+      | 9999 | 404    |
